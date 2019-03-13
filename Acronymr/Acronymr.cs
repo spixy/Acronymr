@@ -8,12 +8,12 @@ namespace Acronymr
     {
         private static readonly char[] _wordSeparators = {' ', '-'};
 
-        private static readonly Dictionary<string, char> _replaceLetterTable = new Dictionary<string, char>
+        private static readonly IDictionary<string, char> defaultReplaceLetterTable = new Dictionary<string, char>
         {
             { "and", '&' }
         };
 
-        private static readonly HashSet<string> _ignoredWords = new HashSet<string>
+        private static readonly ICollection<string> defaultIgnoredWords = new HashSet<string>
         {
             "the",
             "of",
@@ -23,13 +23,13 @@ namespace Acronymr
         public static string GetAcronym(string text, bool replaceSpecialWords = false, bool ignoreMinorWords = false)
         {
             return GetAcronymWithTables(text,
-                                        replaceSpecialWords ? _replaceLetterTable : null,
-                                        ignoreMinorWords ? _ignoredWords : null);
+                                        replaceSpecialWords ? defaultReplaceLetterTable : null,
+                                        ignoreMinorWords ? defaultIgnoredWords : null);
         }
 
-        public static string GetAcronymWithTables(string text, Dictionary<string, char> replaceLetterTable = null, HashSet<string> ignoredWords = null)
+        public static string GetAcronymWithTables(string text, IDictionary<string, char> replaceLetterTable = null, ICollection<string> ignoredWords = null)
         {
-            char? LetterFunc(string word)
+            char? GetLetterFunc(string word)
             {
                 if (replaceLetterTable != null && replaceLetterTable.TryGetValue(word, out char letter))
                 {
@@ -43,22 +43,13 @@ namespace Acronymr
                 return ignoredWords != null && ignoredWords.Contains(word);
             }
 
-            return GetAcronymWithPredicates(text, LetterFunc, IgnoreWordPredicate);
+            return GetAcronymWithPredicates(text, GetLetterFunc, IgnoreWordPredicate);
         }
 
-        public static string GetAcronymWithPredicates(string text, Func<string, char?> letterFunc = null, Func<string, bool> ignoreWordPredicate = null)
+        public static string GetAcronymWithPredicates(string text, Func<string, char?> getLetterFunc = null, Func<string, bool> ignoreWordPredicate = null)
         {
             if (text == null)
                 throw new ArgumentNullException(nameof(text));
-
-            if (letterFunc == null)
-            {
-                letterFunc = word => null;
-            }
-            if (ignoreWordPredicate == null)
-            {
-                ignoreWordPredicate = word => false;
-            }
 
             var words = text.Split(_wordSeparators, StringSplitOptions.RemoveEmptyEntries);
             var stringBuilder = new StringBuilder();
@@ -67,15 +58,17 @@ namespace Acronymr
             {
                 string word = words[i].ToLower();
 
-                if (ignoreWordPredicate(word))
+                if (ignoreWordPredicate != null && ignoreWordPredicate(word))
                     continue;
 
-                char? letter = letterFunc(word) ?? char.ToUpper(word[0]);
+                char? letter = getLetterFunc?.Invoke(word) ?? char.ToUpper(word[0]);
 
                 stringBuilder.Append(letter.Value);
             }
 
             return stringBuilder.ToString();
         }
+
+        // overengineered :/
     }
 }
