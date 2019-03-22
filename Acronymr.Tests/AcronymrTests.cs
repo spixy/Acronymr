@@ -6,24 +6,52 @@ namespace Acronymr.Tests
 {
     public class AcronymrTests
     {
+        // GetAcronymWithTables
+
         [Test]
-        public void GetAcronym_ReturnsException_When_NullString()
+        public void GetAcronymWithTables_ReturnsException_When_NullString()
         {
-            Assert.Throws<ArgumentNullException>(() => Acronymr.GetAcronym(null));
+            Assert.Throws<ArgumentNullException>(() => Acronymr.GetAcronymWithTables(null));
         }
 
         [Test]
-        public void GetAcronym_ThrowsEmpty_When_EmptyString()
+        public void GetAcronymWithTables_ThrowsEmpty_When_EmptyString()
         {
-            Assert.That(Acronymr.GetAcronym(""), Is.Empty);
+            Assert.That(Acronymr.GetAcronymWithTables(""), Is.Empty);
         }
 
         [TestCase("Don't repeat yourself", ExpectedResult = "DRY")]
         [TestCase("Asynchronous Javascript and XML", ExpectedResult = "AJAX")]
         [TestCase("Complementary metal-oxide semiconductor", ExpectedResult = "CMOS")]
-        public string GetAcronym_ReturnsAcronym_When_NonEmptyString(string text)
+        public string GetAcronymWithTables_ReturnsAcronym_When_NonEmptyString(string text)
         {
-            return Acronymr.GetAcronym(text);
+            return Acronymr.GetAcronymWithTables(text);
+        }
+
+        [TestCase("Rythm and blue", ExpectedResult = "R&B")]
+        public string GetAcronymWithTables_ReturnsAcronymWithSpecialLetters_When_NonEmptyString(string text)
+        {
+            return Acronymr.GetAcronymWithTables(text, letterReplacementTable: new Dictionary<string, char> { { "and", '&' } });
+        }
+
+        [TestCase("The Institute of Electrical and Electronics Engineers", ExpectedResult = "IEEE")]
+        public string GetAcronymWithTables_ReturnsAcronymWithoutMinorLetters_When_NonEmptyString(string text)
+        {
+            return Acronymr.GetAcronymWithTables(text, ignoredWords: new[] { "the", "of", "and" });
+        }
+
+        // GetAcronymWithPredicates
+
+        [Test]
+        public void GetAcronymWithPredicates_ReturnsException_When_NullString()
+        {
+            Assert.Throws<ArgumentNullException>(() => Acronymr.GetAcronymWithPredicates(null));
+        }
+
+        [Test]
+        public void GetAcronymWithPredicates_ThrowsEmpty_When_EmptyString()
+        {
+            Assert.That(Acronymr.GetAcronymWithPredicates(""), Is.Empty);
         }
 
         [TestCase("Don't repeat yourself", ExpectedResult = "DRY")]
@@ -35,18 +63,6 @@ namespace Acronymr.Tests
         }
 
         [TestCase("Rythm and blue", ExpectedResult = "R&B")]
-        public string GetAcronym_ReturnsAcronymWithSpecialLetters_When_NonEmptyString(string text)
-        {
-            return Acronymr.GetAcronym(text, replaceSpecialWords: true);
-        }
-
-        [TestCase("Rythm and blue", ExpectedResult = "R&B")]
-        public string GetAcronymWithTables_ReturnsAcronymWithSpecialLetters_When_NonEmptyString(string text)
-        {
-            return Acronymr.GetAcronymWithTables(text, replaceLetterTable: new Dictionary<string, char> { {"and", '&'} });
-        }
-
-        [TestCase("Rythm and blue", ExpectedResult = "R&B")]
         public string GetAcronymWithPredicates_ReturnsAcronymWithSpecialLetters_When_NonEmptyString(string text)
         {
             return Acronymr.GetAcronymWithPredicates(text, getLetterFunc: word =>
@@ -54,18 +70,6 @@ namespace Acronymr.Tests
                 if (word == "and") return '&';
                 return null;
             });
-        }
-
-        [TestCase("The Institute of Electrical and Electronics Engineers", ExpectedResult = "IEEE")]
-        public string GetAcronym_ReturnsAcronymWithoutMinorLetters_When_NonEmptyString(string text)
-        {
-            return Acronymr.GetAcronym(text, ignoreMinorWords: true);
-        }
-
-        [TestCase("The Institute of Electrical and Electronics Engineers", ExpectedResult = "IEEE")]
-        public string GetAcronymWithTables_ReturnsAcronymWithoutMinorLetters_When_NonEmptyString(string text)
-        {
-            return Acronymr.GetAcronymWithTables(text, ignoredWords: new [] { "the", "of", "and"});
         }
 
         [TestCase("The Institute of Electrical and Electronics Engineers", ExpectedResult = "IEEE")]

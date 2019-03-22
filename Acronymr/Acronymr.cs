@@ -8,30 +8,11 @@ namespace Acronymr
     {
         private static readonly char[] _wordSeparators = {' ', '-'};
 
-        private static readonly IDictionary<string, char> defaultReplaceLetterTable = new Dictionary<string, char>
-        {
-            { "and", '&' }
-        };
-
-        private static readonly ICollection<string> defaultIgnoredWords = new HashSet<string>
-        {
-            "the",
-            "of",
-            "and"
-        };
-
-        public static string GetAcronym(string text, bool replaceSpecialWords = false, bool ignoreMinorWords = false)
-        {
-            return GetAcronymWithTables(text,
-                                        replaceSpecialWords ? defaultReplaceLetterTable : null,
-                                        ignoreMinorWords ? defaultIgnoredWords : null);
-        }
-
-        public static string GetAcronymWithTables(string text, IDictionary<string, char> replaceLetterTable = null, ICollection<string> ignoredWords = null)
+        public static string GetAcronymWithTables(string text, IDictionary<string, char> letterReplacementTable = null, ICollection<string> ignoredWords = null)
         {
             char? GetLetterFunc(string word)
             {
-                if (replaceLetterTable != null && replaceLetterTable.TryGetValue(word, out char letter))
+                if (letterReplacementTable != null && letterReplacementTable.TryGetValue(word, out char letter))
                 {
                     return letter;
                 }
@@ -68,7 +49,5 @@ namespace Acronymr
 
             return stringBuilder.ToString();
         }
-
-        // overengineered :/
     }
 }
